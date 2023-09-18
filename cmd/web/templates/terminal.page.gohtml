@@ -103,6 +103,32 @@
             form.classList.add("was-validated");
             hidePayButton();
 
+            let amountToCharge = String(parseFloat(document.getElementById("amount").value) * 100)
+
+            let payload = {
+                amount: amountToCharge,
+                currency: 'try',
+            }
+
+            const requestOptions = {
+                method: 'post',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload),
+            }
+
+            fetch("http://localhost:4001/api/payment-intent", requestOptions)
+                .then(response => response.text())
+                .then(response => {
+                    let data;
+                    try {
+                        data = JSON.parse(response);
+                    } catch (err) {
+
+                    }
+                })
         }
 
         (function () {
