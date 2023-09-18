@@ -68,6 +68,30 @@
 
         stripe = Stripe('pk_test_51MieyiIZYeLuMKg8Qlv86RAle6wUGw1pTtUmLK56e815fxdA1pKIAYmKm0YrBSXPA9CHBZ0hjACS0iOBDK2zoKkO000IcqK2MU');
 
+        function hidePayButton() {
+            payButton.classList.add("d-none");
+            processing.classList.remove("d-none");
+        }
+
+        /*function showPayButtons() {
+            payButton.classList.remove("d-none");
+            processing.classList.add("d-none");
+        }
+
+        function showCardError(msg) {
+            cardMessages.classList.add("alert-danger");
+            cardMessages.classList.remove("alert-success");
+            cardMessages.classList.remove("d-none");
+            cardMessages.innerText = msg;
+        }
+
+        function showCardSuccess() {
+            cardMessages.classList.remove("alert-danger");
+            cardMessages.classList.add("alert-success");
+            cardMessages.classList.remove("d-none");
+            cardMessages.innerText = "Transaction successful";
+        }*/
+
         function val() {
             let form = document.getElementById("charge_form");
             if (form.checkValidity() === false) {
@@ -77,6 +101,8 @@
                 return;
             }
             form.classList.add("was-validated");
+            hidePayButton();
+
         }
 
         (function () {
