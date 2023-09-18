@@ -62,11 +62,21 @@
     <script>
         let card;
         let stripe;
+        const cardMessages = document.getElementById("card-messages");
+        const payButton = document.getElementById("pay-button");
+        const processing = document.getElementById("processing-payment");
 
         stripe = Stripe('pk_test_51MieyiIZYeLuMKg8Qlv86RAle6wUGw1pTtUmLK56e815fxdA1pKIAYmKm0YrBSXPA9CHBZ0hjACS0iOBDK2zoKkO000IcqK2MU');
 
         function val() {
-
+            let form = document.getElementById("charge_form");
+            if (form.checkValidity() === false) {
+                this.event.preventDefault();
+                this.event.stopPropagation();
+                form.classList.add("was-validated");
+                return;
+            }
+            form.classList.add("was-validated");
         }
 
         (function () {
