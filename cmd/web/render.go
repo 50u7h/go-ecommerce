@@ -28,7 +28,6 @@ var functions = template.FuncMap{}
 var templateFS embed.FS
 
 func (app *application) addDefaultData(td *templateData, r *http.Request) *templateData {
-	//td.API = app.config.api
 	return td
 }
 
@@ -48,9 +47,11 @@ func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, p
 			return err
 		}
 	}
+
 	if td == nil {
 		td = &templateData{}
 	}
+
 	td = app.addDefaultData(td, r)
 
 	err = t.Execute(w, td)

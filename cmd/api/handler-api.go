@@ -39,6 +39,7 @@ func (app *application) GetPaymentIntent(w http.ResponseWriter, r *http.Request)
 		Key:      app.config.stripe.key,
 		Currency: payload.Currency,
 	}
+
 	okay := true
 
 	pi, msg, err := card.Charge(payload.Currency, amount)
