@@ -1,6 +1,9 @@
 package main
 
-import "net/http"
+import (
+	"goEcommerce/internal/models"
+	"net/http"
+)
 
 // VirtualTerminal displays the virtual terminal page
 func (app *application) VirtualTerminal(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +46,20 @@ func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request)
 // ChargeOnce displays the page to buy one toy
 func (app *application) ChargeOnce(w http.ResponseWriter, r *http.Request) {
 
-	if err := app.renderTemplate(w, r, "buy-once", nil, "stripe-js"); err != nil {
+	toy := models.Toy{
+		ID:             1,
+		Name:           "Baby Yoda",
+		Description:    "Grogu",
+		InventoryLevel: 10,
+		Price:          1000,
+	}
+
+	data := make(map[string]interface{})
+	data["toy"] = toy
+
+	if err := app.renderTemplate(w, r, "buy-once", &templateData{
+		Data: data,
+	}, "stripe-js"); err != nil {
 		app.errorLog.Println(err)
 	}
 }
