@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"database/sql"
 	"time"
 )
@@ -31,4 +32,18 @@ type Toy struct {
 	Price          int       `json:"price"`
 	CreatedAt      time.Time `json:"-"`
 	UpdatedAt      time.Time `json:"-"`
+}
+
+func (m *DBModel) GetToy(id int) (Toy, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var toy Toy
+
+	row := m.DB.QueryRowContext(ctx, "select id, name from toys where id =? ", id)
+	err := row.Scan(&toy.ID, &toy.Name)
+	if err != nil {
+		return toy, err
+	}
+	return toy, nil
 }
