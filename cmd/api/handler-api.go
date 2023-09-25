@@ -74,17 +74,18 @@ func (app *application) GetPaymentIntent(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+// GetWidgetByID gets one widget by id and returns as JSON
 func (app *application) GetWidgetByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	widgetId, _ := strconv.Atoi(id)
+	widgetID, _ := strconv.Atoi(id)
 
-	widget, err := app.DB.GetWidget(widgetId)
+	widget, err := app.DB.GetWidget(widgetID)
 	if err != nil {
 		app.errorLog.Println(err)
 		return
 	}
 
-	out, err := json.MarshalIndent(widget, "", " ")
+	out, err := json.MarshalIndent(widget, "", "   ")
 	if err != nil {
 		app.errorLog.Println(err)
 		return

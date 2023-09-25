@@ -1,14 +1,15 @@
 package main
 
 import (
-	"github.com/go-chi/chi/v5"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
 )
 
 // VirtualTerminal displays the virtual terminal page
 func (app *application) VirtualTerminal(w http.ResponseWriter, r *http.Request) {
-	if err := app.renderTemplate(w, r, "terminal", nil, "stripe-js"); err != nil {
+	if err := app.renderTemplate(w, r, "terminal", &templateData{}, "stripe-js"); err != nil {
 		app.errorLog.Println(err)
 	}
 }
@@ -46,11 +47,10 @@ func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request)
 
 // ChargeOnce displays the page to buy one widget
 func (app *application) ChargeOnce(w http.ResponseWriter, r *http.Request) {
-
 	id := chi.URLParam(r, "id")
-	widgetId, _ := strconv.Atoi(id)
+	widgetID, _ := strconv.Atoi(id)
 
-	widget, err := app.DB.GetWidget(widgetId)
+	widget, err := app.DB.GetWidget(widgetID)
 	if err != nil {
 		app.errorLog.Println(err)
 		return

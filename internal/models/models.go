@@ -40,12 +40,11 @@ type Order struct {
 	ID            int       `json:"id"`
 	WidgetID      int       `json:"widget_id"`
 	TransactionID int       `json:"transaction_id"`
-	CustomerID    int       `json:"customer_id"`
 	StatusID      int       `json:"status_id"`
 	Quantity      int       `json:"quantity"`
 	Amount        int       `json:"amount"`
 	CreatedAt     time.Time `json:"-"`
-	UpdatedAt     time.Time `json:""`
+	UpdatedAt     time.Time `json:"-"`
 }
 
 // Status is the type for order statuses
@@ -70,10 +69,6 @@ type Transaction struct {
 	Amount              int       `json:"amount"`
 	Currency            string    `json:"currency"`
 	LastFour            string    `json:"last_four"`
-	ExpiryMonth         int       `json:"expiry_month"`
-	ExpiryYear          int       `json:"expiry_year"`
-	PaymentIntent       string    `json:"payment_intent"`
-	PaymentMethod       string    `json:"payment_method"`
 	BankReturnCode      string    `json:"bank_return_code"`
 	TransactionStatusID int       `json:"transaction_status_id"`
 	CreatedAt           time.Time `json:"-"`
@@ -91,16 +86,6 @@ type User struct {
 	UpdatedAt time.Time `json:"-"`
 }
 
-// Customer is the type for customers
-type Customer struct {
-	ID        int       `json:"id"`
-	FirstName string    `json:"first_name"`
-	LastName  string    `json:"last_name"`
-	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"-"`
-	UpdatedAt time.Time `json:"-"`
-}
-
 // GetWidget gets one widget by id
 func (m *DBModel) GetWidget(id int) (Widget, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -108,10 +93,13 @@ func (m *DBModel) GetWidget(id int) (Widget, error) {
 
 	var widget Widget
 
-	row := m.DB.QueryRowContext(ctx, "select "+
-		"id, name, description, inventory_level, price, coalesce(image,''), created_at, updated_at "+
-		"from widgets "+
-		"where id = ? ", id)
+	row := m.DB.QueryRowContext(ctx, `
+		select 
+			id, name, description, inventory_level, price, coalesce(image, ''),
+			created_at, updated_at
+		from 
+			widgets 
+		where id = ?`, id)
 	err := row.Scan(
 		&widget.ID,
 		&widget.Name,
@@ -120,10 +108,12 @@ func (m *DBModel) GetWidget(id int) (Widget, error) {
 		&widget.Price,
 		&widget.Image,
 		&widget.CreatedAt,
-		&widget.UpdatedAt)
+		&widget.UpdatedAt,
+	)
 	if err != nil {
 		return widget, err
 	}
+
 	return widget, nil
 }
 
@@ -132,23 +122,18 @@ func (m *DBModel) InsertTransaction(txn Transaction) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := `
+	stmt := `
 		insert into transactions
-			(amount, currency, last_four, bank_return_code, expiry_month, expiry_year,
-				payment_intent, payment_method,
+			(amount, currency, last_four, bank_return_code,
 			transaction_status_id, created_at, updated_at)
-		values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		values (?, ?, ?, ?, ?, ?, ?)
 	`
 
-	result, err := m.DB.ExecContext(ctx, query,
+	result, err := m.DB.ExecContext(ctx, stmt,
 		txn.Amount,
 		txn.Currency,
 		txn.LastFour,
 		txn.BankReturnCode,
-		txn.ExpiryMonth,
-		txn.ExpiryYear,
-		txn.PaymentIntent,
-		txn.PaymentMethod,
 		txn.TransactionStatusID,
 		time.Now(),
 		time.Now(),
@@ -172,9 +157,9 @@ func (m *DBModel) InsertOrder(order Order) (int, error) {
 
 	stmt := `
 		insert into orders
-			(widget_id, transaction_id, status_id, quantity, customer_id,
+			(widget_id, transaction_id, status_id, quantity,
 			amount, created_at, updated_at)
-		values (?, ?, ?, ?, ?, ?, ?, ?)
+		values (?, ?, ?, ?, ?, ?, ?)
 	`
 
 	result, err := m.DB.ExecContext(ctx, stmt,
@@ -182,7 +167,6 @@ func (m *DBModel) InsertOrder(order Order) (int, error) {
 		order.TransactionID,
 		order.StatusID,
 		order.Quantity,
-		order.CustomerID,
 		order.Amount,
 		time.Now(),
 		time.Now(),
