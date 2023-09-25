@@ -74,17 +74,17 @@ func (app *application) GetPaymentIntent(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (app *application) GetToyByID(w http.ResponseWriter, r *http.Request) {
+func (app *application) GetWidgetByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	toyId, _ := strconv.Atoi(id)
+	widgetId, _ := strconv.Atoi(id)
 
-	toy, err := app.DB.GetToy(toyId)
+	widget, err := app.DB.GetWidget(widgetId)
 	if err != nil {
 		app.errorLog.Println(err)
 		return
 	}
 
-	out, err := json.MarshalIndent(toy, "", " ")
+	out, err := json.MarshalIndent(widget, "", " ")
 	if err != nil {
 		app.errorLog.Println(err)
 		return

@@ -43,10 +43,10 @@ func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-// ChargeOnce displays the page to buy one toy
+// ChargeOnce displays the page to buy one widget
 func (app *application) ChargeOnce(w http.ResponseWriter, r *http.Request) {
 
-	toy := models.Toy{
+	widget := models.Widget{
 		ID:             1,
 		Name:           "Baby Yoda",
 		Description:    "Grogu",
@@ -55,7 +55,7 @@ func (app *application) ChargeOnce(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := make(map[string]interface{})
-	data["toy"] = toy
+	data["widget"] = widget
 
 	if err := app.renderTemplate(w, r, "buy-once", &templateData{
 		Data: data,
