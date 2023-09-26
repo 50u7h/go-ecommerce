@@ -1,11 +1,10 @@
 package main
 
 import (
+	"github.com/go-chi/chi/v5"
 	"goEcommerce/internal/cards"
 	"net/http"
 	"strconv"
-
-	"github.com/go-chi/chi/v5"
 )
 
 // Home displays the home page
@@ -58,6 +57,12 @@ func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request)
 	lastFour := pm.Card.Last4
 	expiryMonth := pm.Card.ExpMonth
 	expiryYear := pm.Card.ExpYear
+
+	// create a new customer
+
+	// create a new transaction
+
+	// create a new order
 
 	data := make(map[string]interface{})
 	data["cardholder"] = cardHolder
