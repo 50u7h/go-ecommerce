@@ -198,7 +198,7 @@ func (m *DBModel) InsertOrder(order Order) (int, error) {
 	return int(id), nil
 }
 
-// InsertOrder inserts a new order, and returns its id
+// InsertCustomer inserts a new order, and returns its id
 func (m *DBModel) InsertCustomer(c Customer) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
