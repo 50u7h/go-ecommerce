@@ -32,7 +32,7 @@ type Widget struct {
 	Price          int       `json:"price"`
 	Image          string    `json:"image"`
 	IsRecurring    bool      `json:"is_recurring"`
-	PlanId         string    `json:"plan_id"`
+	PlanID         string    `json:"plan_id"`
 	CreatedAt      time.Time `json:"-"`
 	UpdatedAt      time.Time `json:"-"`
 }
@@ -125,7 +125,7 @@ func (m *DBModel) GetWidget(id int) (Widget, error) {
 		&widget.Price,
 		&widget.Image,
 		&widget.IsRecurring,
-		&widget.PlanId,
+		&widget.PlanID,
 		&widget.CreatedAt,
 		&widget.UpdatedAt,
 	)

@@ -1,13 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/go-chi/chi/v5"
+	"goEcommerce/internal/cards"
 	"goEcommerce/internal/driver"
 	"goEcommerce/internal/models"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -52,7 +56,7 @@ func main() {
 	var cfg config
 
 	flag.IntVar(&cfg.port, "port", 4001, "Server port to listen on")
-	flag.StringVar(&cfg.env, "env", "development", "Application enviornment {development|production|maintenance}")
+	flag.StringVar(&cfg.env, "env", "development", "Application environment {development|production|maintenance}")
 	flag.StringVar(&cfg.db.dsn, "dsn", "username:password@tcp(localhost:3306)/widgets?parseTime=true&tls=false", "DSN")
 
 	flag.Parse()
@@ -81,4 +85,107 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func (app *application) GetPaymentIntent(w http.ResponseWriter, r *http.Request) {
+	var payload stripePayload
+
+	err := json.NewDecoder(r.Body).Decode(&payload)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	amount, err := strconv.Atoi(payload.Amount)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	card := cards.Card{
+		Secret:   app.config.stripe.secret,
+		Key:      app.config.stripe.key,
+		Currency: payload.Currency,
+	}
+
+	okay := true
+
+	pi, msg, err := card.Charge(payload.Currency, amount)
+	if err != nil {
+		okay = false
+	}
+
+	if okay {
+		out, err := json.MarshalIndent(pi, "", "   ")
+		if err != nil {
+			app.errorLog.Println(err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(out)
+	} else {
+		j := jsonResponse{
+			OK:      false,
+			Message: msg,
+			Content: "",
+		}
+
+		out, err := json.MarshalIndent(j, "", "   ")
+		if err != nil {
+			app.errorLog.Println(err)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(out)
+	}
+}
+
+// GetWidgetByID gets one widget by id and returns as JSON
+func (app *application) GetWidgetByID(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	widgetID, _ := strconv.Atoi(id)
+
+	widget, err := app.DB.GetWidget(widgetID)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	out, err := json.MarshalIndent(widget, "", "   ")
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(out)
+}
+
+func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, r *http.Request) {
+	var data stripePayload
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	app.infoLog.Println(data.Email, data.LastFour, data.PaymentMethod, data.Plan)
+
+	okay := true
+	msg := ""
+
+	resp := jsonResponse{
+		OK:      okay,
+		Message: msg,
+	}
+
+	out, err := json.MarshalIndent(resp, "", "  ")
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(out)
 }
