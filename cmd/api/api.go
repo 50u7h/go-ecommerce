@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	"github.com/stripe/stripe-go/v75"
 	"goEcommerce/internal/cards"
 	"goEcommerce/internal/driver"
 	"goEcommerce/internal/models"
@@ -178,21 +179,28 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 		Currency: data.Currency,
 	}
 
+	okay := true
+	var subscription *stripe.Subscription
+
 	stripeCustomer, msg, err := card.CreateCustomer(data.PaymentMethod, data.Email)
 	if err != nil {
 		app.errorLog.Println(err)
-		return
+		okay = false
 	}
 
-	subscriptionID, err := card.SubscribeToPlan(stripeCustomer, data.Plan, data.Email, data.LastFour, "")
-	if err != nil {
-		app.errorLog.Println(err)
-		return
+	if okay {
+		subscription, err = card.SubscribeToPlan(stripeCustomer, data.Plan, data.Email, data.LastFour, "")
+		if err != nil {
+			app.errorLog.Println(err)
+			okay = false
+		}
+		app.infoLog.Println("subscription id is: %s", subscription.ID)
 	}
 
-	app.infoLog.Println("subscription id is: %s", subscriptionID.ID)
+	if okay {
 
-	okay := true
+	}
+	
 	//msg := ""
 
 	resp := jsonResponse{
