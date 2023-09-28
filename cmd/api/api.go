@@ -338,7 +338,6 @@ func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// send response
-
 	var payload struct {
 		Error   bool          `json:"error"`
 		Message string        `json:"message"`
@@ -350,4 +349,8 @@ func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) 
 
 	_ = app.writeJSON(w, http.StatusOK, payload)
 
+}
+
+func (app *application) CheckAuthentication(w http.ResponseWriter, r *http.Request) {
+	app.invalidCredentials(w)
 }
