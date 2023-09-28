@@ -352,5 +352,25 @@ func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) 
 }
 
 func (app *application) CheckAuthentication(w http.ResponseWriter, r *http.Request) {
-	app.invalidCredentials(w)
+	// validate the token, and get associated user
+	user, err := app.authenticateToken(r)
+	if err != nil {
+		app.invalidCredentials(w)
+		return
+	}
+
+	// valid user
+	var payload struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+	payload.Error = false
+	payload.Message = fmt.Sprintf("authenticated user %s", user.Email)
+	app.writeJSON(w, http.StatusOK, payload)
+}
+
+func (app *application) authenticateToken(r *http.Request) (*models.User, error) {
+	var user models.User
+
+	return &user, nil
 }
