@@ -23,6 +23,9 @@ func (app *application) routes() http.Handler {
 	mux.Get("/plans/bronze", app.Bronze)
 	mux.Get("/receipt/bronze", app.BronzePlanReceipt)
 
+	// auth routes
+	mux.Get("/login", app.LoginPage)
+
 	fileServer := http.FileServer(http.Dir("./static"))
 	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
 
