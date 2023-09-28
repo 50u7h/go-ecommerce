@@ -331,6 +331,11 @@ func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// save to database
+	err = app.DB.InsertToken(token, user)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
 
 	// send response
 
