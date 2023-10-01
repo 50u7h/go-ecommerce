@@ -11,6 +11,7 @@ import (
 	"goEcommerce/internal/driver"
 	"goEcommerce/internal/models"
 	"goEcommerce/internal/urlsigner"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
 	"os"
@@ -526,6 +527,47 @@ func (app *application) SendPasswordResetEmail(w http.ResponseWriter, r *http.Re
 	}
 
 	resp.Error = false
+
+	app.writeJSON(w, http.StatusCreated, resp)
+}
+
+func (app *application) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	var payload struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	err := app.readJSON(w, r, &payload)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	user, err := app.DB.GetUserByEmail(payload.Email)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	newHash, err := bcrypt.GenerateFromPassword([]byte(payload.Password), 12)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	err = app.DB.UpdatePasswordForUser(user, string((newHash)))
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	var resp struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	resp.Error = false
+	resp.Message = "password changed"
 
 	app.writeJSON(w, http.StatusCreated, resp)
 }
