@@ -14,6 +14,7 @@
             <th>Customer</th>
             <th>Product</th>
             <th>Amount</th>
+            <th>Status</th>
         </tr>
         </thead>
         <tbody>
@@ -47,7 +48,7 @@
                         newCell.innerHTML = `<a href="/admin/sales/${i.id}">Order ${i.id}</a>`;
 
                         newCell = newRow.insertCell();
-                        let item = document.createTextNode(i.customer.last_name + ", " + i.customer.first_name);
+                        let item = document.createTextNode(i.customer.first_name + " " + i.customer.last_name);
                         newCell.appendChild(item);
 
                         newCell = newRow.insertCell();
@@ -58,6 +59,13 @@
                         newCell = newRow.insertCell();
                         item = document.createTextNode(cur);
                         newCell.appendChild(item);
+
+                        newCell = newRow.insertCell();
+                        if (i.status_id != 1) {
+                            newCell.innerHTML = `<span class="badge bg-danger">Refunded</span>`;
+                        } else {
+                            newCell.innerHTML = `<span class="badge bg-success">Charged</span>`;
+                        }
                     })
                 } else {
                     let newRow = tbody.insertRow();
