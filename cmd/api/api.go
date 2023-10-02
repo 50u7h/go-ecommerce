@@ -592,7 +592,7 @@ func (app *application) AllSales(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) AllSubscriptions(w http.ResponseWriter, r *http.Request) {
-	allSubscriptions, err := app.DB.GetAllOrders()
+	allSubscriptions, err := app.DB.GetAllSubscriptions()
 	if err != nil {
 		app.badRequest(w, r, err)
 	}
