@@ -48,7 +48,7 @@
                             newCell.innerHTML = `<a href="/admin/subscriptions/${i.id}">Order ${i.id}</a>`;
 
                             newCell = newRow.insertCell();
-                            let item = document.createTextNode(i.customer.last_name + ", " + i.customer.first_name);
+                            let item = document.createTextNode(i.customer.first_name + " " + i.customer.last_name);
                             newCell.appendChild(item);
 
                             newCell = newRow.insertCell();
