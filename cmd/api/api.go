@@ -613,12 +613,13 @@ func (app *application) GetSale(w http.ResponseWriter, r *http.Request) {
 	app.writeJSON(w, http.StatusOK, order)
 }
 
+// RefundCharge accepts a json payload and tries to refund a charge
 func (app *application) RefundCharge(w http.ResponseWriter, r *http.Request) {
 	var chargeToRefund struct {
-		ID            int    `json:"id""`
-		PaymentIntent string `json:"pi`
-		Amount        int    `json:"amount""`
-		Currency      string `json:"currency""`
+		ID            int    `json:"id"`
+		PaymentIntent string `json:"pi"`
+		Amount        int    `json:"amount"`
+		Currency      string `json:"currency"`
 	}
 
 	err := app.readJSON(w, r, &chargeToRefund)
@@ -644,7 +645,6 @@ func (app *application) RefundCharge(w http.ResponseWriter, r *http.Request) {
 		Error   bool   `json:"error"`
 		Message string `json:"message"`
 	}
-
 	resp.Error = false
 	resp.Message = "Charge Refunded"
 

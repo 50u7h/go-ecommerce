@@ -9,12 +9,14 @@ import (
 	subscription2 "github.com/stripe/stripe-go/v75/subscription"
 )
 
+// Card holds the information needed by this package
 type Card struct {
 	Secret   string
 	Key      string
 	Currency string
 }
 
+// Transaction is the type to store information for a given transaction
 type Transaction struct {
 	TransactionStatusID int
 	Amount              int
@@ -23,10 +25,12 @@ type Transaction struct {
 	BankReturnCode      string
 }
 
+// Charge is an alias to CreatePaymentIntent
 func (c *Card) Charge(currency string, amount int) (*stripe.PaymentIntent, string, error) {
 	return c.CreatePaymentIntent(currency, amount)
 }
 
+// CreatePaymentIntent attempts to get a payment intent object from Stripe
 func (c *Card) CreatePaymentIntent(currency string, amount int) (*stripe.PaymentIntent, string, error) {
 	stripe.Key = c.Secret
 
@@ -72,8 +76,8 @@ func (c *Card) RetrievePaymentIntent(id string) (*stripe.PaymentIntent, error) {
 }
 
 // SubscribeToPlan subscribes a stripe customer to a stripe plan
-func (c *Card) SubscribeToPlan(customer *stripe.Customer, plan, email, last4, cardType string) (*stripe.Subscription, error) {
-	stripeCustomerID := customer.ID
+func (c *Card) SubscribeToPlan(cust *stripe.Customer, plan, email, last4, cardType string) (*stripe.Subscription, error) {
+	stripeCustomerID := cust.ID
 	items := []*stripe.SubscriptionItemsParams{
 		{Plan: stripe.String(plan)},
 	}
@@ -104,7 +108,7 @@ func (c *Card) CreateCustomer(pm, email string) (*stripe.Customer, string, error
 		},
 	}
 
-	customer, err := customer.New(customerParams)
+	cust, err := customer.New(customerParams)
 	if err != nil {
 		msg := ""
 		if stripeErr, ok := err.(*stripe.Error); ok {
@@ -112,9 +116,10 @@ func (c *Card) CreateCustomer(pm, email string) (*stripe.Customer, string, error
 		}
 		return nil, msg, err
 	}
-	return customer, "", nil
+	return cust, "", nil
 }
 
+// Refund refunds an amount for a paymentIntent
 func (c *Card) Refund(pi string, amount int) error {
 	stripe.Key = c.Secret
 	amountToRefund := int64(amount)
@@ -128,6 +133,7 @@ func (c *Card) Refund(pi string, amount int) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
