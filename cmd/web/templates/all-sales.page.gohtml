@@ -51,7 +51,7 @@
                 pageBtns[j].addEventListener("click", function (evt) {
                     let desiredPage = evt.target.getAttribute("data-page");
                     if ((desiredPage > 0) && (desiredPage <= pages + 1)) {
-                        //updateTable(pageSize, desiredPage);
+                        updateTable(pageSize, desiredPage);
                     }
                 })
             }
