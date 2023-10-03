@@ -377,8 +377,8 @@ func (m *DBModel) GetAllOrders() ([]*Order, error) {
 	return orders, nil
 }
 
-// GetAllSubscriptionsPaginated returns a slice of a subset of subscriptions
-func (m *DBModel) GetAllSubscriptionsPaginated(pageSize, page int) ([]*Order, int, int, error) {
+// GetAllOrdersPaginated returns a slice of a subset of orders
+func (m *DBModel) GetAllOrdersPaginated(pageSize, page int) ([]*Order, int, int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -400,7 +400,7 @@ func (m *DBModel) GetAllSubscriptionsPaginated(pageSize, page int) ([]*Order, in
 		left join transactions t on (o.transaction_id = t.id)
 		left join customers c on (o.customer_id = c.id)
 	where
-		w.is_recurring = 1
+		w.is_recurring = 0
 	order by
 		o.created_at desc
 	limit ? offset ?
@@ -452,7 +452,7 @@ func (m *DBModel) GetAllSubscriptionsPaginated(pageSize, page int) ([]*Order, in
 			orders o
 			left join widgets w on (o.widget_id = w.id)
 		where
-			w.is_recurring = 1
+			w.is_recurring = 0
 	`
 	var totalRecords int
 	countRow := m.DB.QueryRowContext(ctx, query)
