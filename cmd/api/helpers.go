@@ -44,7 +44,10 @@ func (app *application) badRequest(w http.ResponseWriter, r *http.Request, err e
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(out)
+	_, err = w.Write(out)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -64,7 +67,10 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data interf
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	w.Write(out)
+	_, err = w.Write(out)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

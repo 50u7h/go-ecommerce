@@ -1,6 +1,7 @@
 package cards
 
 import (
+	"errors"
 	"github.com/stripe/stripe-go/v75"
 	"github.com/stripe/stripe-go/v75/customer"
 	"github.com/stripe/stripe-go/v75/paymentintent"
@@ -45,7 +46,8 @@ func (c *Card) CreatePaymentIntent(currency string, amount int) (*stripe.Payment
 	pi, err := paymentintent.New(params)
 	if err != nil {
 		msg := ""
-		if stripeErr, ok := err.(*stripe.Error); ok {
+		var stripeErr *stripe.Error
+		if errors.As(err, &stripeErr) {
 			msg = cardErrorMessage(stripeErr.Code)
 		}
 		return nil, msg, err
@@ -111,7 +113,8 @@ func (c *Card) CreateCustomer(pm, email string) (*stripe.Customer, string, error
 	cust, err := customer.New(customerParams)
 	if err != nil {
 		msg := ""
-		if stripeErr, ok := err.(*stripe.Error); ok {
+		var stripeErr *stripe.Error
+		if errors.As(err, &stripeErr) {
 			msg = cardErrorMessage(stripeErr.Code)
 		}
 		return nil, msg, err

@@ -307,9 +307,12 @@ func (app *application) LoginPage(w http.ResponseWriter, r *http.Request) {
 
 // PostLoginPage handles the posted login form
 func (app *application) PostLoginPage(w http.ResponseWriter, r *http.Request) {
-	app.Session.RenewToken(r.Context())
+	err := app.Session.RenewToken(r.Context())
+	if err != nil {
+		return
+	}
 
-	err := r.ParseForm()
+	err = r.ParseForm()
 	if err != nil {
 		app.errorLog.Println(err)
 		return
@@ -329,8 +332,14 @@ func (app *application) PostLoginPage(w http.ResponseWriter, r *http.Request) {
 
 // Logout from session
 func (app *application) Logout(w http.ResponseWriter, r *http.Request) {
-	app.Session.Destroy(r.Context())
-	app.Session.RenewToken(r.Context())
+	err := app.Session.Destroy(r.Context())
+	if err != nil {
+		return
+	}
+	err = app.Session.RenewToken(r.Context())
+	if err != nil {
+		return
+	}
 
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

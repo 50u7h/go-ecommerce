@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/gob"
 	"flag"
 	"fmt"
@@ -83,7 +84,12 @@ func main() {
 	if err != nil {
 		errorLog.Fatal(err)
 	}
-	defer conn.Close()
+	defer func(conn *sql.DB) {
+		err := conn.Close()
+		if err != nil {
+
+		}
+	}(conn)
 
 	// set up session
 	session = scs.New()

@@ -287,7 +287,7 @@ func (m *DBModel) Authenticate(email, password string) (int, error) {
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-	if err == bcrypt.ErrMismatchedHashAndPassword {
+	if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 		return 0, errors.New("incorrect password")
 	} else if err != nil {
 		return 0, err
@@ -339,7 +339,12 @@ func (m *DBModel) GetAllOrders() ([]*Order, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+
+		}
+	}(rows)
 
 	for rows.Next() {
 		var o Order
@@ -410,7 +415,12 @@ func (m *DBModel) GetAllOrdersPaginated(pageSize, page int) ([]*Order, int, int,
 	if err != nil {
 		return nil, 0, 0, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+
+		}
+	}(rows)
 
 	for rows.Next() {
 		var o Order
@@ -496,7 +506,12 @@ func (m *DBModel) GetAllSubscriptions() ([]*Order, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+
+		}
+	}(rows)
 
 	for rows.Next() {
 		var o Order
@@ -567,7 +582,12 @@ func (m *DBModel) GetAllSubscriptionsPaginated(pageSize, page int) ([]*Order, in
 	if err != nil {
 		return nil, 0, 0, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+
+		}
+	}(rows)
 
 	for rows.Next() {
 		var o Order
@@ -713,7 +733,12 @@ func (m *DBModel) GetAllUsers() ([]*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+
+		}
+	}(rows)
 
 	for rows.Next() {
 		var u User
