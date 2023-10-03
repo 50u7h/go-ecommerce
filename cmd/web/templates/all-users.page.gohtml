@@ -28,11 +28,8 @@
 
 {{define "js"}}
     <script>
-
-        let tbody = document.getElementById("user-table").getElementsByTagName("tbody")[0];
-        /*
         document.addEventListener("DOMContentLoaded", function () {
-
+            let tbody = document.getElementById("user-table").getElementsByTagName("tbody")[0];
             let token = localStorage.getItem("token");
 
             const requestOptions = {
@@ -48,6 +45,7 @@
                 .then(response => response.json())
                 .then(function (data) {
                     console.log(data);
+                    /*
                     if (data) {
                         data.forEach(function (i) {
                             let newRow = tbody.insertRow();
@@ -64,9 +62,9 @@
                         let newCell = tbody.insertCell();
                         newCell.setAttribute("colspan", "2");
                         newCell.innerHTML = "no data available";
-                    }
+                    }*/
                 })
-        })*/
+        })
 
     </script>
 {{end}}
