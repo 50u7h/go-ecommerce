@@ -24,55 +24,66 @@
 
 {{define "js"}}
     <script>
-        let token = localStorage.getItem("token");
-        let tbody = document.getElementById("sales-table").getElementsByTagName("tbody")[0];
+        let currentPage = 1;
+        let pageSize = 2;
 
-        const requestOptions = {
-            method: 'post',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-            },
-        }
+        document.addEventListener("DOMContentLoaded", function () {
+            let token = localStorage.getItem("token");
+            let tbody = document.getElementById("sales-table").getElementsByTagName("tbody")[0];
 
-        fetch("{{.API}}/api/admin/all-sales", requestOptions)
-            .then(response => response.json())
-            .then(function (data) {
-                if (data) {
-                    data.forEach(function (i) {
+            let body = {
+                page_size: pageSize,
+                current_page: currentPage,
+            }
+
+            const requestOptions = {
+                method: 'post',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token,
+                },
+                body: JSON.stringify(body),
+            }
+
+            fetch("{{.API}}/api/admin/all-sales", requestOptions)
+                .then(response => response.json())
+                .then(function (data) {
+                    if (data.orders) {
+                        data.orders.forEach(function (i) {
+                            let newRow = tbody.insertRow();
+                            let newCell = newRow.insertCell();
+
+                            newCell.innerHTML = `<a href="/admin/sales/${i.id}">Order ${i.id}</a>`;
+
+                            newCell = newRow.insertCell();
+                            let item = document.createTextNode(i.customer.first_name + " " + i.customer.last_name);
+                            newCell.appendChild(item);
+
+                            newCell = newRow.insertCell();
+                            item = document.createTextNode(i.widget.name);
+                            newCell.appendChild(item);
+
+                            let cur = formatCurrency(i.transaction.amount);
+                            newCell = newRow.insertCell();
+                            item = document.createTextNode(cur);
+                            newCell.appendChild(item);
+
+                            newCell = newRow.insertCell();
+                            if (i.status_id != 1) {
+                                newCell.innerHTML = `<span class="badge bg-danger">Refunded</span>`;
+                            } else {
+                                newCell.innerHTML = `<span class="badge bg-success">Charged</span>`;
+                            }
+                        })
+                    } else {
                         let newRow = tbody.insertRow();
                         let newCell = newRow.insertCell();
-
-                        newCell.innerHTML = `<a href="/admin/sales/${i.id}">Order ${i.id}</a>`;
-
-                        newCell = newRow.insertCell();
-                        let item = document.createTextNode(i.customer.first_name + " " + i.customer.last_name);
-                        newCell.appendChild(item);
-
-                        newCell = newRow.insertCell();
-                        item = document.createTextNode(i.widget.name);
-                        newCell.appendChild(item);
-
-                        let cur = formatCurrency(i.transaction.amount);
-                        newCell = newRow.insertCell();
-                        item = document.createTextNode(cur);
-                        newCell.appendChild(item);
-
-                        newCell = newRow.insertCell();
-                        if (i.status_id != 1) {
-                            newCell.innerHTML = `<span class="badge bg-danger">Refunded</span>`;
-                        } else {
-                            newCell.innerHTML = `<span class="badge bg-success">Charged</span>`;
-                        }
-                    })
-                } else {
-                    let newRow = tbody.insertRow();
-                    let newCell = newRow.insertCell();
-                    newCell.setAttribute("colspan", "4");
-                    newCell.innerHTML = "No data available";
-                }
-            })
+                        newCell.setAttribute("colspan", "4");
+                        newCell.innerHTML = "No data available";
+                    }
+                })
+        })
 
         function formatCurrency(amount) {
             let c = parseFloat(amount / 100);
