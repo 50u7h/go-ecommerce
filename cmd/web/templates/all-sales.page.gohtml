@@ -31,7 +31,7 @@
 {{define "js"}}
     <script>
         let currentPage = 1;
-        let pageSize = 5;
+        let pageSize = 3;
 
         function paginator(pages, curPage) {
             let p = document.getElementById("paginator");
@@ -46,15 +46,15 @@
 
             p.innerHTML = html;
 
-            /*let pageBtns = document.getElementsByClassName("pager");
+            let pageBtns = document.getElementsByClassName("pager");
             for (var j = 0; j < pageBtns.length; j++) {
                 pageBtns[j].addEventListener("click", function (evt) {
                     let desiredPage = evt.target.getAttribute("data-page");
                     if ((desiredPage > 0) && (desiredPage <= pages + 1)) {
-                        updateTable(pageSize, desiredPage);
+                        //updateTable(pageSize, desiredPage);
                     }
                 })
-            }*/
+            }
         }
 
         function updateTable(ps, cp) {
