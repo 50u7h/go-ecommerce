@@ -113,6 +113,7 @@ func main() {
 	}
 }
 
+// GetPaymentIntent gets a payment intent, and returns json (or error json)
 func (app *application) GetPaymentIntent(w http.ResponseWriter, r *http.Request) {
 	var payload stripePayload
 
@@ -331,6 +332,7 @@ func (app *application) SaveOrder(order models.Order) (int, error) {
 	return id, nil
 }
 
+// authenticateToken checks an auth token for validity
 func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) {
 	var userInput struct {
 		Email    string `json:"email"`
@@ -408,6 +410,7 @@ func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) 
 
 }
 
+// CheckAuthentication checks auth status
 func (app *application) CheckAuthentication(w http.ResponseWriter, r *http.Request) {
 	// validate the token, and get associated user
 	user, err := app.authenticateToken(r)
@@ -433,6 +436,7 @@ func (app *application) CheckAuthentication(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+// VirtualTerminalPaymentSucceeded displays a page with receipt information
 func (app *application) authenticateToken(r *http.Request) (*models.User, error) {
 	authorizationHeader := r.Header.Get("Authorization")
 	if authorizationHeader == "" {
@@ -536,6 +540,7 @@ func (app *application) VirtualTerminalPaymentSucceeded(w http.ResponseWriter, r
 	}
 }
 
+// SendPasswordResetEmail sends an email with a signed url to allow user to reset password
 func (app *application) SendPasswordResetEmail(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
 		Email string `json:"email"`
@@ -604,6 +609,7 @@ func (app *application) SendPasswordResetEmail(w http.ResponseWriter, r *http.Re
 	}
 }
 
+// ResetPassword resets a user's password in the database
 func (app *application) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
 		Email    string `json:"email"`
@@ -840,6 +846,7 @@ func (app *application) RefundCharge(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// CancelSubscription is the handler to cancel a subscription
 func (app *application) CancelSubscription(w http.ResponseWriter, r *http.Request) {
 	var subToCancel struct {
 		ID            int    `json:"id"`
@@ -894,6 +901,7 @@ func (app *application) CancelSubscription(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+// AllUsers returns a JSON file listing all admin users
 func (app *application) AllUsers(w http.ResponseWriter, r *http.Request) {
 	allUsers, err := app.DB.GetAllUsers()
 	if err != nil {
@@ -910,6 +918,7 @@ func (app *application) AllUsers(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// OneUser gets one user by id (from the url) and returns it as JSON
 func (app *application) OneUser(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	userID, _ := strconv.Atoi(id)
@@ -927,4 +936,83 @@ func (app *application) OneUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+}
+
+// EditUser is the handler for adding or editing an existing user
+func (app *application) EditUser(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	userID, _ := strconv.Atoi(id)
+
+	var user models.User
+
+	err := app.readJSON(w, r, &user)
+	if err != nil {
+		err := app.badRequest(w, r, err)
+		if err != nil {
+			return
+		}
+		return
+	}
+
+	if userID > 0 {
+		err = app.DB.EditUser(user)
+		if err != nil {
+			err := app.badRequest(w, r, err)
+			if err != nil {
+				return
+			}
+			return
+		}
+		if user.Password != "" {
+			newHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
+			if err != nil {
+				err := app.badRequest(w, r, err)
+				if err != nil {
+					return
+				}
+				return
+			}
+			err = app.DB.UpdatePasswordForUser(user, string(newHash))
+			if err != nil {
+				err := app.badRequest(w, r, err)
+				if err != nil {
+					return
+				}
+				return
+			}
+		}
+	} else {
+		newHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
+		if err != nil {
+			err := app.badRequest(w, r, err)
+			if err != nil {
+				return
+			}
+			return
+		}
+		err = app.DB.AddUser(user, string(newHash))
+		if err != nil {
+			err := app.badRequest(w, r, err)
+			if err != nil {
+				return
+			}
+			return
+		}
+	}
+
+	var resp struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	resp.Error = false
+	err = app.writeJSON(w, http.StatusOK, resp)
+	if err != nil {
+		return
+	}
+}
+
+// DeleteUser deletes a user, and all associated tokens, from the database
+func (app *application) DeleteUser(w http.ResponseWriter, r *http.Request) {
+
 }
