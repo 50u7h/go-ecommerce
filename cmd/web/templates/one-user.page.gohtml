@@ -147,8 +147,7 @@
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Delete User'
             }).then((result) => {
-                console.log("would delete user id", id);
-                /*if (result.isConfirmed) {
+                if (result.isConfirmed) {
                     const requestOptions = {
                         method: 'post',
                         headers: {
@@ -164,17 +163,17 @@
                             if (data.error) {
                                 Swal.fire("Error: " + data.message);
                             } else {
-                                let jsonData = {
+                                /*let jsonData = {
                                     action: "deleteUser",
                                     user_id: parseInt(id, 10),
                                 }
 
-                                socket.send(JSON.stringify(jsonData));
+                                socket.send(JSON.stringify(jsonData));*/
 
                                 location.href = "/admin/all-users";
                             }
                         })
-                }*/
+                }
             })
         })
     </script>
