@@ -58,7 +58,7 @@
 {{end}}
 
 {{define "js"}}
-    {{/*<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>*/}}
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let token = localStorage.getItem("token");
         let id = window.location.pathname.split("/").pop();
@@ -111,8 +111,9 @@
         document.addEventListener("DOMContentLoaded", function () {
 
             if (id !== "0") {
-                delBtn.classList.remove("d-none");
-
+                if (id !== "{{.UserID}}") {
+                    delBtn.classList.remove("d-none");
+                }
 
                 const requestOptions = {
                     method: 'post',
