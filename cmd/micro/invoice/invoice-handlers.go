@@ -33,7 +33,28 @@ func (app *application) CreateAndSendInvoice(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	// send reponse
+	/*
+		order.ID = 100
+		order.Email = "test@test.com"
+		order.FirstName = "test"
+		order.LastName = "TEST"
+		order.Quantity = 1
+		order.Amount = 9999
+		order.Product = "Widget"
+		order.CreatedAt = time.Now()
+	*/
+
+	// generate a pdf invoice
+	err = app.createInvoicePDF(order)
+	if err != nil {
+		err := app.badRequest(w, r, err)
+		if err != nil {
+			return
+		}
+		return
+	}
+
+	// send response
 	var resp struct {
 		Error   bool   `json:"error"`
 		Message string `json:"message"`
