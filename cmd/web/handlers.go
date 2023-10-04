@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"goEcommerce/internal/cards"
 	"goEcommerce/internal/encryption"
 	"goEcommerce/internal/models"
 	"goEcommerce/internal/urlsigner"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -96,6 +99,17 @@ func (app *application) GetTransactionData(r *http.Request) (TransactionData, er
 	return txnData, nil
 }
 
+type Invoice struct {
+	ID        int       `json:"id"`
+	Quantity  int       `json:"quantity"`
+	Amount    int       `json:"amount"`
+	Product   string    `json:"product"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 // PaymentSucceeded displays the receipt page
 func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
@@ -150,15 +164,60 @@ func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request)
 		CreatedAt:     time.Now(),
 		UpdatedAt:     time.Now(),
 	}
-	_, err = app.SaveOrder(order)
+	orderID, err := app.SaveOrder(order)
 	if err != nil {
 		app.errorLog.Println(err)
 		return
 	}
 
+	// call microservice
+	inv := Invoice{
+		ID:        orderID,
+		Amount:    order.Amount,
+		Product:   "Widget",
+		Quantity:  order.Quantity,
+		FirstName: txnData.FirstName,
+		LastName:  txnData.LastName,
+		Email:     txnData.Email,
+		CreatedAt: time.Now(),
+	}
+
+	err = app.callInvoiceMicro(inv)
+	if err != nil {
+		app.errorLog.Println(err)
+	}
+
 	// write this data to session, and then redirect user to new page
 	app.Session.Put(r.Context(), "receipt", txnData)
 	http.Redirect(w, r, "/receipt", http.StatusSeeOther)
+}
+
+func (app *application) callInvoiceMicro(inv Invoice) error {
+	url := "http://localhost:5000/invoice/create-and-send"
+	out, err := json.MarshalIndent(inv, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(out))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+
+		}
+	}(resp.Body)
+
+	return nil
 }
 
 // VirtualTerminalPaymentSucceeded displays the receipt page for virtual terminal transactions
