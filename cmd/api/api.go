@@ -909,3 +909,22 @@ func (app *application) AllUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (app *application) OneUser(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	userID, _ := strconv.Atoi(id)
+
+	user, err := app.DB.GetOneUser(userID)
+	if err != nil {
+		err := app.badRequest(w, r, err)
+		if err != nil {
+			return
+		}
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, user)
+	if err != nil {
+		return
+	}
+}
