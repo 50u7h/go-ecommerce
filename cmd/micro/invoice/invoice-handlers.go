@@ -33,19 +33,23 @@ func (app *application) CreateAndSendInvoice(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	/*
-		order.ID = 100
-		order.Email = "test@test.com"
-		order.FirstName = "test"
-		order.LastName = "TEST"
-		order.Quantity = 1
-		order.Amount = 9999
-		order.Product = "Widget"
-		order.CreatedAt = time.Now()
-	*/
-
 	// generate a pdf invoice
 	err = app.createInvoicePDF(order)
+	if err != nil {
+		err := app.badRequest(w, r, err)
+		if err != nil {
+			return
+		}
+		return
+	}
+
+	// create mail attachment
+	attachments := []string{
+		fmt.Sprintf("./invoices/%d.pdf", order.ID),
+	}
+
+	// send mail with attachment
+	err = app.SendMail("info@widgets.com", order.Email, "Your invoice", "invoice", attachments, nil)
 	if err != nil {
 		err := app.badRequest(w, r, err)
 		if err != nil {
